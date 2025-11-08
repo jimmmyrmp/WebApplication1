@@ -56,18 +56,29 @@ namespace WebApplication1.Controllers
 
         // POST: Expedientes/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("AlumnoId,MateriaId,NotaFinal,Observaciones")] Expediente expediente)
+        public async Task<IActionResult> Create(int AlumnoId, int MateriaId, decimal NotaFinal, string Observaciones)
         {
-            if (ModelState.IsValid)
+            try
             {
+                var expediente = new Expediente
+                {
+                    AlumnoId = AlumnoId,
+                    MateriaId = MateriaId,
+                    NotaFinal = NotaFinal,
+                    Observaciones = Observaciones
+                };
+
                 _context.Add(expediente);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.AlumnoId = new SelectList(_context.Alumnos, "AlumnoId", "Nombre", expediente.AlumnoId);
-            ViewBag.MateriaId = new SelectList(_context.Materias, "MateriaId", "NombreMateria", expediente.MateriaId);
-            return View(expediente);
+            catch (Exception ex)
+            {
+                ViewBag.AlumnoId = new SelectList(_context.Alumnos, "AlumnoId", "Nombre", AlumnoId);
+                ViewBag.MateriaId = new SelectList(_context.Materias, "MateriaId", "NombreMateria", MateriaId);
+                ModelState.AddModelError("", "Error al guardar: " + ex.Message);
+                return View();
+            }
         }
 
         // GET: Expedientes/Edit/5
@@ -90,37 +101,32 @@ namespace WebApplication1.Controllers
 
         // POST: Expedientes/Edit/5
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ExpedienteId,AlumnoId,MateriaId,NotaFinal,Observaciones")] Expediente expediente)
+        public async Task<IActionResult> Edit(int id, int AlumnoId, int MateriaId, decimal NotaFinal, string Observaciones)
         {
-            if (id != expediente.ExpedienteId)
+            try
             {
-                return NotFound();
-            }
+                var expediente = await _context.Expedientes.FindAsync(id);
+                if (expediente == null)
+                {
+                    return NotFound();
+                }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(expediente);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ExpedienteExists(expediente.ExpedienteId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                expediente.AlumnoId = AlumnoId;
+                expediente.MateriaId = MateriaId;
+                expediente.NotaFinal = NotaFinal;
+                expediente.Observaciones = Observaciones;
+
+                _context.Update(expediente);
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.AlumnoId = new SelectList(_context.Alumnos, "AlumnoId", "Nombre", expediente.AlumnoId);
-            ViewBag.MateriaId = new SelectList(_context.Materias, "MateriaId", "NombreMateria", expediente.MateriaId);
-            return View(expediente);
+            catch (Exception ex)
+            {
+                ViewBag.AlumnoId = new SelectList(_context.Alumnos, "AlumnoId", "Nombre", AlumnoId);
+                ViewBag.MateriaId = new SelectList(_context.Materias, "MateriaId", "NombreMateria", MateriaId);
+                ModelState.AddModelError("", "Error al actualizar: " + ex.Message);
+                return View();
+            }
         }
 
         // GET: Expedientes/Delete/5
