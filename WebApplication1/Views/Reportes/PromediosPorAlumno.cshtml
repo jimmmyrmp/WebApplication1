@@ -1,0 +1,22 @@
+﻿@using GestionExpedientes.Models
+@model List<PromedioPorAlumno>
+
+<h1>Promedio de Notas por Alumno</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre Completo</th>
+            <th>Promedio</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Nombre @item.Apellido</td>
+                <td>@item.Promedio.ToString("F2")</td>
+            </tr>
+        }
+    </tbody>
+</table>
